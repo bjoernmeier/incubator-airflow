@@ -9,6 +9,7 @@ import inspect
 import logging
 import os
 import sys
+from pkg_resources import iter_entry_points
 from itertools import chain
 merge = chain.from_iterable
 
@@ -33,6 +34,7 @@ class AirflowPlugin(object):
             raise AirflowPluginException("Your plugin needs a name.")
 
 
+entrypoint_group = configuration.get('core', 'entrypoint_group')
 plugins_folder = configuration.get('core', 'plugins_folder')
 if not plugins_folder:
     plugins_folder = configuration.get('core', 'airflow_home') + '/plugins'
@@ -42,32 +44,45 @@ if plugins_folder not in sys.path:
     sys.path.append(plugins_folder)
 
 plugins = []
+if not plugins:
+    # Crawl through the plugins folder to find AirflowPlugin derivatives
+    for root, dirs, files in os.walk(plugins_folder, followlinks=True):
+        for f in files:
+            try:
+                filepath = os.path.join(root, f)
+                if not os.path.isfile(filepath):
+                    continue
+                mod_name, file_ext = os.path.splitext(
+                    os.path.split(filepath)[-1])
+                if file_ext != '.py':
+                    continue
+                namespace = root.replace('/', '__') + '_' + mod_name
+                m = imp.load_source(namespace, filepath)
+                for obj in list(m.__dict__.values()):
+                    if (
+                            inspect.isclass(obj) and
+                            issubclass(obj, AirflowPlugin) and
+                            obj is not AirflowPlugin):
+                        obj.validate()
+                        if obj not in plugins:
+                            plugins.append(obj)
 
-# Crawl through the plugins folder to find AirflowPlugin derivatives
-for root, dirs, files in os.walk(plugins_folder, followlinks=True):
-    for f in files:
+            except Exception as e:
+                logging.exception(e)
+                logging.error('Failed to import plugin ' + filepath)
+
+    # Allow for plugin classes also to be registered as entry points in packages
+    for entry_point in iter_entry_points(group=entrypoint_group + '.plugins', name=None):
+        dist = entry_point.dist
         try:
-            filepath = os.path.join(root, f)
-            if not os.path.isfile(filepath):
-                continue
-            mod_name, file_ext = os.path.splitext(
-                os.path.split(filepath)[-1])
-            if file_ext != '.py':
-                continue
-            namespace = root.replace('/', '__') + '_' + mod_name
-            m = imp.load_source(namespace, filepath)
-            for obj in list(m.__dict__.values()):
-                if (
-                        inspect.isclass(obj) and
-                        issubclass(obj, AirflowPlugin) and
-                        obj is not AirflowPlugin):
-                    obj.validate()
-                    if obj not in plugins:
-                        plugins.append(obj)
-
+            obj = entry_point.load()
+            if issubclass(obj, AirflowPlugin) and obj is not AirflowPlugin:
+                obj.validate()
+                if obj not in plugins:
+                    plugins.append(obj)
         except Exception as e:
             logging.exception(e)
-            logging.error('Failed to import plugin ' + filepath)
+            logging.error('Failed to import plugin ' + entry_point.module_name)
 
 operators = merge([p.operators for p in plugins])
 hooks = merge([p.hooks for p in plugins])

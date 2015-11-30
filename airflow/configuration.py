@@ -51,6 +51,7 @@ defaults = {
         'parallelism': 32,
         'load_examples': True,
         'plugins_folder': None,
+        'entrypoint_group': 'airflow',
         'security': None,
         'donot_pickle': False,
         's3_log_folder': '',
