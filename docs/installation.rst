@@ -173,6 +173,30 @@ In addition, users can supply an S3 location for storing log backups. If logs ar
     base_log_folder = {AIRFLOW_HOME}/logs
     s3_log_folder = s3://{YOUR S3 LOG PATH}
 
+Supplying DAGs and Plugins via Packages
+'''''''''''''''''''''''''''''''''''''''
+
+Users can add plugins and dags via the specified folders in ``airflow.cfg`` or via setuptool's `entry point mechanism <https://pythonhosted.org/setuptools/setuptools.html#dynamic-discovery-of-services-and-plugins>`_. To provide plugins or dags via entry points, use the entry point groups ``airflow.dags`` and ``airflow.plugins``. If you use use pbr's ``setup.cfg`` a configuration might look as follows:
+
+.. code-block:: bash
+
+    [entry_points]
+    airflow.plugins =
+        example_plugin1 = my_package.plugins.examples:ExamplePlugin1
+        example_plugin1 = my_package.plugins.examples:ExamplePlugin2
+    airflow.dags =
+        dag1 = my_package.dags.examples:example_dag
+        dag2 = my_package.dags.tutorial:turial_dag
+
+Now the plugins and dags are automatically loaded if the package ``my_package`` is installed. The prefix used for the entry point group (``airflow.*``) can be configured via the ``entrypoint_group`` key:
+
+.. code-block:: bash
+
+    [core]
+    entrypoint_group = airflow
+
+Once loaded, plugins and dags behave as if they were loaded via the file loading mechanism, e.g. it is possible to view a dag's definition in code.
+
 Scaling Out on Mesos (community contributed)
 ''''''''''''''''''''''''''''''''''''''''''''
 MesosExecutor allows you to schedule airflow tasks on a Mesos cluster.
