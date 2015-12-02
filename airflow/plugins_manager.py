@@ -43,8 +43,10 @@ plugins_folder = os.path.expanduser(plugins_folder)
 if plugins_folder not in sys.path:
     sys.path.append(plugins_folder)
 
-plugins = []
-if not plugins:
+
+if 'plugins' not in globals():
+    plugins = []
+
     # Crawl through the plugins folder to find AirflowPlugin derivatives
     for root, dirs, files in os.walk(plugins_folder, followlinks=True):
         for f in files:
