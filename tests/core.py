@@ -54,7 +54,7 @@ class CoreTest(unittest.TestCase):
     def setUp(self):
         configuration.test_mode()
         self.dagbag = models.DagBag(
-            dag_folder=DEV_NULL, include_examples=True)
+            dag_folder=DEV_NULL, entrypoint_group="--no-group--", include_examples=True)
         self.args = {'owner': 'airflow', 'start_date': DEFAULT_DATE}
         dag = DAG(TEST_DAG_ID, default_args=self.args)
         self.dag = dag
@@ -133,7 +133,7 @@ class CoreTest(unittest.TestCase):
 
     def test_backfill_examples(self):
         self.dagbag = models.DagBag(
-            dag_folder=DEV_NULL, include_examples=True)
+            dag_folder=DEV_NULL,  entrypoint_group="--no-group--", include_examples=True)
         dags = [
             dag for dag in self.dagbag.dags.values()
             if dag.dag_id in ('example_bash_operator',)]
@@ -478,7 +478,7 @@ class CliTests(unittest.TestCase):
         app.config['TESTING'] = True
         self.parser = cli.get_parser()
         self.dagbag = models.DagBag(
-            dag_folder=DEV_NULL, include_examples=True)
+            dag_folder=DEV_NULL, entrypoint_group="--no-group--",  include_examples=True)
 
     def test_cli_list_dags(self):
         args = self.parser.parse_args(['list_dags'])

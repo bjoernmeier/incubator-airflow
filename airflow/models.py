@@ -351,11 +351,14 @@ class DagBag(LoggingMixin):
 
         for entry_point in iter_entry_points(group=entrypoint_group + '.dags', name=None):
             dist = entry_point.dist
-            logging.info("Importing " + dist.project_name)
+            logging.info("Importing package " + dist.project_name)
 
             try:
+                logging.info("Importing DAG from module " + entry_point.module_name)
                 dag = entry_point.load()
+                logging.info(dag)
                 if isinstance(dag, DAG):
+                    logging.info("Is dag")
                     # Get the file defining the dag to display it in the ui
                     module_path = sys.modules[entry_point.module_name].__file__
 

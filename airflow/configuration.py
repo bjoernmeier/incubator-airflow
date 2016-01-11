@@ -18,6 +18,8 @@ except:
     pass
 
 
+
+
 def generate_fernet_key():
     try:
         FERNET_KEY = Fernet.generate_key().decode()
@@ -286,6 +288,8 @@ TEST_CONFIG = """\
 airflow_home = {AIRFLOW_HOME}
 dags_folder = {AIRFLOW_HOME}/dags
 base_log_folder = {AIRFLOW_HOME}/logs
+entrypoint_group = airflow_test
+plugins_folder = {PACKAGE_HOME}/example_plugins
 executor = SequentialExecutor
 sql_alchemy_conn = sqlite:///{AIRFLOW_HOME}/unittests.db
 unit_test_mode = True
@@ -415,6 +419,7 @@ if 'AIRFLOW_CONFIG' not in os.environ:
 else:
     AIRFLOW_CONFIG = expand_env_var(os.environ['AIRFLOW_CONFIG'])
 
+PACKAGE_HOME = os.path.dirname(os.path.realpath(__file__))
 
 def parameterized_config(template):
     """
@@ -444,6 +449,7 @@ if not os.path.isfile(AIRFLOW_CONFIG):
         f.write(parameterized_config(DEFAULT_CONFIG))
 
 logging.info("Reading the config from " + AIRFLOW_CONFIG)
+
 
 
 def test_mode():

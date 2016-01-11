@@ -34,6 +34,8 @@ class AirflowPlugin(object):
             raise AirflowPluginException("Your plugin needs a name.")
 
 
+
+
 entrypoint_group = configuration.get('core', 'entrypoint_group')
 plugins_folder = configuration.get('core', 'plugins_folder')
 if not plugins_folder:
@@ -45,7 +47,7 @@ if plugins_folder not in sys.path:
 
 
 if 'plugins' not in globals():
-    plugins = []
+    plugins = {}
 
     # Crawl through the plugins folder to find AirflowPlugin derivatives
     for root, dirs, files in os.walk(plugins_folder, followlinks=True):
@@ -66,8 +68,11 @@ if 'plugins' not in globals():
                             issubclass(obj, AirflowPlugin) and
                             obj is not AirflowPlugin):
                         obj.validate()
-                        if obj not in plugins:
-                            plugins.append(obj)
+                        if obj.name not in plugins:
+                            logging.info("Importing plugin " + obj.name)
+                            plugins[obj.name] = obj
+                        else:
+                            logging.warning("Plugin named " + obj.name + " already imported")
 
             except Exception as e:
                 logging.exception(e)
@@ -80,11 +85,16 @@ if 'plugins' not in globals():
             obj = entry_point.load()
             if issubclass(obj, AirflowPlugin) and obj is not AirflowPlugin:
                 obj.validate()
-                if obj not in plugins:
-                    plugins.append(obj)
+                if obj.name not in plugins:
+                    logging.info("Importing plugin " + obj.name)
+                    plugins[obj.name] = obj
+                else:
+                    logging.warning("Plugin named " + obj.name + " already imported")
         except Exception as e:
             logging.exception(e)
             logging.error('Failed to import plugin ' + entry_point.module_name)
+
+    plugins = plugins.values()
 
 operators = merge([p.operators for p in plugins])
 hooks = merge([p.hooks for p in plugins])
