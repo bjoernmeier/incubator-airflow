@@ -373,7 +373,7 @@ class DagBag(LoggingMixin):
 
             except Exception as e:
                 logging.exception(e)
-                logging.error('Failed to import plugin ' + entry_point.module_name)
+                logging.error('Failed to import DAG ' + entry_point.module_name)
 
     def deactivate_inactive_dags(self):
         active_dag_ids = [dag.dag_id for dag in list(self.dags.values())]
