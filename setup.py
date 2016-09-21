@@ -174,6 +174,14 @@ def do_setup():
         version=version,
         packages=find_packages(),
         package_data={'': ['airflow/alembic.ini', "airflow/git_version"]},
+        entry_points={
+            'airflow_test.plugins': [
+                'test_plugin = airflow.example_plugins.test_plugin:AirflowTestPlugin',
+            ],
+            'airflow_test.dags': [
+                'bash_operator = airflow.example_dags.example_bash_operator:dag',
+            ]
+        },
         include_package_data=True,
         zip_safe=False,
         scripts=['airflow/bin/airflow'],

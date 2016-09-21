@@ -112,7 +112,8 @@ class CoreTest(unittest.TestCase):
     def setUp(self):
         configuration.load_test_config()
         self.dagbag = models.DagBag(
-            dag_folder=DEV_NULL, include_examples=True)
+            dag_folder=DEV_NULL, entrypoint_group="--no-group--",
+            include_examples=True)
         self.args = {'owner': 'airflow', 'start_date': DEFAULT_DATE}
         dag = DAG(TEST_DAG_ID, default_args=self.args)
         self.dag = dag
@@ -898,7 +899,8 @@ class CliTests(unittest.TestCase):
         app.config['TESTING'] = True
         self.parser = cli.CLIFactory.get_parser()
         self.dagbag = models.DagBag(
-            dag_folder=DEV_NULL, include_examples=True)
+            dag_folder=DEV_NULL, entrypoint_group="--no-group--",
+            include_examples=True)
         # Persist DAGs
 
     def test_cli_list_dags(self):

@@ -12,6 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# -*- coding: utf-8 -*-
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -173,6 +187,9 @@ security =
 # Turn unit test mode on (overwrites many configuration options with test
 # values at runtime)
 unit_test_mode = False
+
+# The group name plugins must belong to be imported with pkg_resources
+entrypoint_group = airflow
 
 
 [operators]
@@ -403,6 +420,8 @@ unit_test_mode = True
 airflow_home = {AIRFLOW_HOME}
 dags_folder = {TEST_DAGS_FOLDER}
 base_log_folder = {AIRFLOW_HOME}/logs
+entrypoint_group = airflow_test
+plugins_folder = {PACKAGE_HOME}/example_plugins
 executor = SequentialExecutor
 sql_alchemy_conn = sqlite:///{AIRFLOW_HOME}/unittests.db
 load_examples = True
@@ -671,6 +690,8 @@ if 'AIRFLOW_CONFIG' not in os.environ:
         AIRFLOW_CONFIG = AIRFLOW_HOME + '/airflow.cfg'
 else:
     AIRFLOW_CONFIG = expand_env_var(os.environ['AIRFLOW_CONFIG'])
+
+PACKAGE_HOME = os.path.dirname(os.path.realpath(__file__))
 
 # Set up dags folder for unit tests
 # this directory won't exist if users install via pip
