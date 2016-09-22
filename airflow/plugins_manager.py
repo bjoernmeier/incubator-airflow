@@ -97,7 +97,6 @@ for root, dirs, files in os.walk(plugins_folder, followlinks=True):
 
 # Allow for plugin classes also to be registered as entry points in packages
 for entry_point in iter_entry_points(group=entrypoint_group + '.plugins', name=None):
-    dist = entry_point.dist
     try:
         obj = entry_point.load()
         if issubclass(obj, AirflowPlugin) and obj is not AirflowPlugin:
